@@ -145,23 +145,32 @@ For this project, we set $T=1000$ and train the agent for 100 episodes. The trai
 \end{figure}
 
 \subsection{Comparison with Base Order Policy}
-Since we assume a leading time of 1, the traditional base-stock method is not feasible since it requires a leading time of 0. Thus, we compare our method to the base-order policy, i.e., the retailer always order the same amount at each time period. We sample 1000 episodes and plot the histogram of the total reward in \Cref{fig:hist-base-10,fig:hist-base-11,fig:hist-base-12}. We can see that the best scenario for the base-stock policy in \Cref{fig:hist-base-10} can attain a total reward close to that in \Cref{fig:total-reward}. But it's rather rare. From \Cref{fig:hist-base-11,fig:hist-base-12}, we can see that though the worst scenario is better than that in \Cref{fig:hist-base-10} but the best scenario is worse than that in \Cref{fig:hist-base-10}. This is because the base-stock policy is not adaptive to the environment. In contrast, our method can adapt to the environment and find the optimal policy.
+Since we assume a leading time of 1, the traditional base-stock method is not feasible since it requires a leading time of 0 (the retailer need to order after the demand is realized). Thus, we compare our method to the base-order policy, i.e., the retailer always order the same amount at the start of each time period. We sample 1000 episodes for each policy and plot the histogram of the total reward in \Cref{fig:hist-base-9,fig:hist-base-10,fig:hist-base-11,fig:hist-base-12}. 
+
+We can see that the best scenario for the base-stock policy in \Cref{fig:hist-base-10} can attain an average reward close to that in \Cref{fig:total-reward}. However, the average reward with DQN in \Cref{fig:total-reward} is around 4560 wich is larger than 4373 so that the DQN method performs better than the base-order policy in this case. This is intuitive since the base-order policy is a special case of the DQN method. The DQN method can find the optimal policy with respect to the current state (inventory level) while the base-order policy can only find the optimal policy in some special cases.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure/Histogram of rewards - Base 9.png}
+    \caption{Histogram of Rewards for Base Order Policy with Base Order 9}
+    \label{fig:hist-base-9}
+\end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figure/Histogram of rewards - Base 10.png}
-    \caption{Histogram of Rewards for Base Order Policy with Base Stock 10}
+    \caption{Histogram of Rewards for Base Order Policy with Base Order 10}
     \label{fig:hist-base-10}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figure/Histogram of rewards - Base 11.png}
-    \caption{Histogram of Rewards for Base Order Policy with Base Stock 11}
+    \caption{Histogram of Rewards for Base Order Policy with Base Order 11}
     \label{fig:hist-base-11}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{figure/Histogram of rewards - Base 12.png}
-    \caption{Histogram of Rewards for Base Order Policy with Base Stock 12}
+    \caption{Histogram of Rewards for Base Order Policy with Base Order 12}
     \label{fig:hist-base-12}
 \end{figure}
 
