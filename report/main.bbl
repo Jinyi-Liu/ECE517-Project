@@ -1,0 +1,35 @@
+\begin{thebibliography}{3}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem[{Gijsbrechts et~al.(2022)Gijsbrechts, Boute, Van~Mieghem,
+  \protect\BIBand{} Zhang}]{gijsbrechts_can_2022}
+Gijsbrechts J, Boute RN, Van~Mieghem JA, Zhang DJ (2022) Can {Deep}
+  {Reinforcement} {Learning} {Improve} {Inventory} {Management}? {Performance}
+  on {Lost} {Sales}, {Dual}-{Sourcing}, and {Multi}-{Echelon} {Problems}.
+  \emph{Manufacturing \& Service Operations Management} 24(3):1349--1368, ISSN
+  1523-4614, \urlprefix\url{http://dx.doi.org/10.1287/msom.2021.1064},
+  publisher: INFORMS.
+
+\bibitem[{Oroojlooyjadid et~al.(2022)Oroojlooyjadid, Nazari, Snyder,
+  \protect\BIBand{} Takáč}]{oroojlooyjadid_deep_2022}
+Oroojlooyjadid A, Nazari M, Snyder LV, Takáč M (2022) A {Deep} {Q}-{Network}
+  for the {Beer} {Game}: {Deep} {Reinforcement} {Learning} for {Inventory}
+  {Optimization}. \emph{Manufacturing \& Service Operations Management}
+  24(1):285--304, ISSN 1523-4614,
+  \urlprefix\url{http://dx.doi.org/10.1287/msom.2020.0939}, publisher: INFORMS.
+
+\bibitem[{Silver et~al.(2016)Silver, Huang, Maddison, Guez, Sifre, van~den
+  Driessche, Schrittwieser, Antonoglou, Panneershelvam, Lanctot, Dieleman,
+  Grewe, Nham, Kalchbrenner, Sutskever, Lillicrap, Leach, Kavukcuoglu, Graepel,
+  \protect\BIBand{} Hassabis}]{silver_mastering_2016}
+Silver D, Huang A, Maddison CJ, Guez A, Sifre L, van~den Driessche G,
+  Schrittwieser J, Antonoglou I, Panneershelvam V, Lanctot M, Dieleman S, Grewe
+  D, Nham J, Kalchbrenner N, Sutskever I, Lillicrap T, Leach M, Kavukcuoglu K,
+  Graepel T, Hassabis D (2016) Mastering the game of {Go} with deep neural
+  networks and tree search. \emph{Nature} 529(7587):484--489, ISSN 1476-4687,
+  \urlprefix\url{http://dx.doi.org/10.1038/nature16961}, number: 7587
+  Publisher: Nature Publishing Group.
+
+\end{thebibliography}

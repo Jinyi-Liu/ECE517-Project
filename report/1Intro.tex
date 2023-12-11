@@ -1,0 +1,71 @@
+
+\section{Introduction}\label{intro}
+% Introduce and motivate your project
+Currently, no topic is hotter than machine learning and artificial intelligence. We are surrounded by it in our daily lives, from the ads we see on social media to the recommendations we get on Netflix. We focus on deep reinforcement learning (DRL), a subfield of machine learning. DRL employs deep neural networks to approximate the value function or policy function of a reinforcement learning (RL) agent, which circumvent the curse of dimensionality inherent to dynamic programming. DRL has been successfully applied to many domains, such as robotics, video games, and finance.\footnote{\url{https://github.com/AI4Finance-Foundation/FinRL-Meta}} For example, with the help of DRL, the program AlphaGo defeated the world champion in the game of Go \citep{silver_mastering_2016}.
+
+However, despite the ongoing frenzy about these breakthroughs, applications of DRL in industrial contexts, such as inventory management, remain rather scarce. The true strength of these general learning algorithms is that they provide a way to solve a diversity of problems rather than relying on extensive domain knowledge or restrictive assumptions. In the inventory management literature, a variety of model-specific heuristics exists; it typically depends on the model assumptions which heuristic performs best. In contrast, DRL algorithms are easily accessible and can be applied to any sequential decision-making problem. As such, DRL could be perceived as a general purpose technology that can serve many different purposes.
+
+In this project, we test the use of DRL in one classical inventory problems, namely the lost sales inventory problem. In this problem, a retailer faces stochastic demand and has to decide how much to order from a supplier since there is a positive holding cost each period. The customers walk away if the inventory is not enough to satisfy their demand and it incurs a goodwill lost to the retailer. The goal of the retailer is to maximize the expected total profit. Though it's a conceptually simple problem, little is known about the optimal policy structure since the traditional dynamic programming method quickly becomes intractable as the problem size grows, i.e., the leading time of the order increases.
+
+\section{Related Work}
+Discuss relevant prior studies and highlight their difference to your project
+\citet{oroojlooyjadid_deep_2022} apply deep Q learning to the beer distribution game. The beer game consists of a serial supply chain network with four agents—a retailer, a warehouse, a distributor, and a manufacturer—that must make independent replenishment decisions with limited information. They show that when playing with teammates who follow a base-stock policy, our algorithm obtains nearoptimal order quantities. More important, it performs significantly better than a base-stock policy when other agents use a more realistic model of human ordering behavior.
+
+\citet{gijsbrechts_can_2022} is another paper using DRL. The paper differs from \citet{oroojlooyjadid_deep_2022} in two distinctive ways. First, they provide optimality gaps on three different inventory problems whose stochastic dynamic program becomes quickly intractable. Second, they show the versatility of DRL by applying it to three different inventory problems with limited modification of the algorithm, thereby demonstrating that DRL resembles a general purpose technology.
+
+This project is inspired by \citet{gijsbrechts_can_2022}. We use a simple DRL algorithm to solve the lost sales inventory problem.
+
+
+\section{RL Environment}
+% Introduce the environment and explain any changes you made or developed to the environment
+Since there is no existing RL environment for the lost sales inventory problem, we develop our own environment. The environment is a discrete-time, finite-horizon, and finite-state Markov decision process (MDP). The state space is the inventory level, and the action space is the order quantity. The transition probability is the probability of demand. The reward function is the profit function defined in the next section. The agent is a standard deep Q network (DQN) with a fully connected neural network as the function approximator. The agent is trained with the Adam optimizer and the mean squared error loss function. We use experience replay and target network to stabilize the training process. In the following sections, we will discuss the details of the environment and the agent.
+
+\section{Methodology}
+% Describe technical details such as RL algorithm (and its parameters), action space, observation space, and reward function
+\subsection{Environment}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Parameter}             & \textbf{Value}      \\
+        \hline
+        \texttt{max\_warehouse\_level} & 20                  \\
+        \texttt{max\_order}            & 15                  \\
+        \texttt{max\_demand}           & 12                  \\
+        \texttt{min\_demand}           & 8                   \\
+        \texttt{state\_space}          & [0, 1, 2, ..., 20]  \\
+        \texttt{action\_space}         & [0, 1, 2, ..., 15]  \\
+        \texttt{demand\_space}         & [8, 9, 10, ..., 12] \\
+        \texttt{price}                 & 10                  \\
+        \texttt{wholesale\_price}      & 5                   \\
+        \texttt{holding\_cost}         & 1                   \\
+        \texttt{lost\_sale\_cost}      & 1                   \\
+        \texttt{over\_order\_cost}     & 3                   \\
+        % \texttt{transition\_function} & \textit{function reference} \\
+        \hline
+    \end{tabular}
+    \caption{Parameters}
+    \label{tab:pars}
+\end{table}
+We initilize the self-defined InventoryManagement environment using the parameters in \Cref{tab:pars}. For simplicity, we consider only discrete values for the state space, action space, and demand space. Also, the \textbf{max\_order} is set to control the quantity the retailer order each time. This is relavant since in reality, the retailer can only order a limited quantity relative to her inventory level each time for many reasons. The price, wholesale price, holding cost, lost sale cost, and over order cost can be changed to reflect different scenarios. In this case, we use \text{over\_order\_cost} to penalize the retailer for ordering too much. 
+
+
+For each step, we have the reward $r_t$ at time $t$ as
+\begin{equation}
+   r_t = p\min\{I_{t}, D_t\} - p_w a_t - p_l\left[D_t-I_t\right]^+ - p_h\left[I_t-D_t\right]^+,
+\end{equation}
+where $p$ is the retail price, $I_t$ is the state starting at $t$, i.e., the inventory level, $D_t$ is realized random demand at time $t$, $p_w a_t$ is the wholesale price for the order arriving at $t+1$, $a_t$ is the action which is the order quantity at time $t$ which has a lead time of $1$, $p_l$ is the cost of lost sales and $p_h$ is the holding cost. 
+
+Here, for the simplicity of our project, we restrict the state space to be 1-dimensional, i.e., the order with leading time 1. However, the environment can be easily extended to higher dimensions. For example, we can add the order with leading time 2, 3, etc. to the state space which might be more realistic. For example, considering a leading time of 2, the state space will be 2-dimensional, $(I_t,I_{t+1})$. The the retailer order $a_t$, then the state space at $t+1$ will be $(I_{t+1},[I_{t+1}-D_{t+1}]^++a_t)$. 
+
+\subsection{Network Architecture}
+Though it seems that multi-arm bandit can solve this problem, we still employ DQN since it can be easily generalized to higher dimendional state space. 
+
+
+
+\section{Experiments and Results}
+Report the experiment set-up and results
+
+
+\section{Conclusion and Future Work}
+Summarize your project and discuss possible extensions of the project
