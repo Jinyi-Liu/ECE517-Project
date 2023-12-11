@@ -47,24 +47,90 @@ Since there is no existing RL environment for the lost sales inventory problem, 
     \caption{Parameters}
     \label{tab:pars}
 \end{table}
-We initilize the self-defined InventoryManagement environment using the parameters in \Cref{tab:pars}. For simplicity, we consider only discrete values for the state space, action space, and demand space. Also, the \textbf{max\_order} is set to control the quantity the retailer order each time. This is relavant since in reality, the retailer can only order a limited quantity relative to her inventory level each time for many reasons. The price, wholesale price, holding cost, lost sale cost, and over order cost can be changed to reflect different scenarios. In this case, we use \text{over\_order\_cost} to penalize the retailer for ordering too much. 
+We initilize the self-defined InventoryManagement environment using the parameters in \Cref{tab:pars}. For simplicity, we consider only discrete values for the state space, action space, and demand space. Also, the \textbf{max\_order} is set to control the quantity the retailer order each time. This is relavant since in reality, the retailer can only order a limited quantity relative to her inventory level each time for many reasons. The price, wholesale price, holding cost, lost sale cost, and over order cost can be changed to reflect different scenarios. In this case, we use \text{over\_order\_cost} to penalize the retailer for ordering too much.
 
 
 For each step, we have the reward $r_t$ at time $t$ as
 \begin{equation}
-   r_t = p\min\{I_{t}, D_t\} - p_w a_t - p_l\left[D_t-I_t\right]^+ - p_h\left[I_t-D_t\right]^+,
+    r_t = p\min\{I_{t}, D_t\} - p_w a_t - p_l\left[D_t-I_t\right]^+ - p_h\left[I_t-D_t\right]^+,
 \end{equation}
-where $p$ is the retail price, $I_t$ is the state starting at $t$, i.e., the inventory level, $D_t$ is realized random demand at time $t$, $p_w a_t$ is the wholesale price for the order arriving at $t+1$, $a_t$ is the action which is the order quantity at time $t$ which has a lead time of $1$, $p_l$ is the cost of lost sales and $p_h$ is the holding cost. 
+where $p$ is the retail price, $I_t$ is the state starting at $t$, i.e., the inventory level, $D_t$ is realized random demand at time $t$, $p_w a_t$ is the wholesale price for the order arriving at $t+1$, $a_t$ is the action which is the order quantity at time $t$ which has a lead time of $1$, $p_l$ is the cost of lost sales and $p_h$ is the holding cost.
 
-Here, for the simplicity of our project, we restrict the state space to be 1-dimensional, i.e., the order with leading time 1. However, the environment can be easily extended to higher dimensions. For example, we can add the order with leading time 2, 3, etc. to the state space which might be more realistic. For example, considering a leading time of 2, the state space will be 2-dimensional, $(I_t,I_{t+1})$. The the retailer order $a_t$, then the state space at $t+1$ will be $(I_{t+1},[I_{t+1}-D_{t+1}]^++a_t)$. 
+Here, for the simplicity of our project, we restrict the state space to be 1-dimensional, i.e., the order with leading time 1. However, the environment can be easily extended to higher dimensions. For example, we can add the order with leading time 2, 3, etc. to the state space which might be more realistic. For example, considering a leading time of 2, the state space will be 2-dimensional, $(I_t,I_{t+1})$. The the retailer order $a_t$, then the state space at $t+1$ will be $(I_{t+1},[I_{t+1}-D_{t+1}]^++a_t)$. For each episode, we want to maximize the total reward
+\begin{equation}
+    \sum_{t=1}^T \gamma^t r_t
+\end{equation}
+where $T$ is the total number of steps in each episode and $\gamma$ is the discount factor which is set to $0.99$ in our project.
+
+
 
 \subsection{Network Architecture}
-Though it seems that multi-arm bandit can solve this problem, we still employ DQN since it can be easily generalized to higher dimendional state space. 
+Though it seems that multi-arm bandit can solve this problem, we still employ DQN since it can be easily generalized to higher dimendional state space.
+\begin{verbatim}
+class DQN(nn.Module):
+    def __init__(self, state_space, action_space):
+        super(DQN, self).__init__()
+        self.action_space = action_space
+        self.fc1 = nn.Linear(state_space, 64)
+        self.fc2 = nn.Linear(64, 32)
+        self.fc3 = nn.Linear(32, action_space)
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+\end{verbatim}
 
+\begin{verbatim}
+class Agent:
+    def __init__(self, state_space, action_space):
+        self.action_space = action_space 
+        self.state_space = state_space
+        self.epsilon = 1.0
+        self.epsilon_min = 0.01
+        self.epsilon_decay = 0.99
+        self.gamma = 0.99
+        self.batch_size = 2048
+        self.memory = deque(maxlen=100000)
+        self.model = DQN(state_space, action_space).to(device)
+        self.optimizer = optim.Adam(self.model.parameters())
+        self.MSE_loss = nn.MSELoss().to(device)
+\end{verbatim}
+We use a simple fully connected neural network as the function approximator. The memory is of length 100,000 and the batch size is 2048. The optimizer is Adam and the loss function is mean squared error. Also, we use a simple decaying epsilon greedy policy to balance exploration and exploitation.
 
+Besides, we use experience replay and target network to stabilize the training process. The experience replay is implemented as follows. During the experience replay, we ramdomly sample a batch of data from the memory and update the network. Then we use the difference between the target network and the current network to update the target network by backpropagation.
+\begin{verbatim}
+def replay(self):
+    if len(self.memory) < self.batch_size:
+        return
+    minibatch = random.sample(self.memory, self.batch_size)
+    states, actions, rewards, next_states = map(np.array, zip(*minibatch))
+    states = torch.tensor(states.reshape(-1, 1), 
+                        dtype=torch.float32, device=device)
+    next_states = torch.tensor(next_states.reshape(-1, 1), 
+                        dtype=torch.float32, device=device)
+    self.model.eval()
+    next_state_values = self.model(next_states).detach().cpu().numpy()
+    self.model.train()
+    targets = rewards + self.gamma * (np.amax(next_state_values, axis=1)) 
+    targets_full = self.model(states)
+    targets_pred = targets_full.clone()
+    targets_full[torch.arange(self.batch_size), torch.tensor(actions, device=device)]
+     = torch.tensor(targets, dtype=torch.float32, device=device)
+
+    loss = self.MSE_loss(targets_pred, targets_full)
+    self.optimizer.zero_grad()
+    loss.backward()
+    self.optimizer.step()
+\end{verbatim}
+
+\section{Training}
+We omit the code here. For this project, we set $T=1000$ and train the agent for 100 episodes. The training process is done on a personal PC with 12700K and RTX 4090. 
+
+After each step, we store the state, action, reward, and next state in the memory. Then if the memory is large enough, we sample a batch of data from the memory and update the network using the method mentioned in the previous subsection. 
 
 \section{Experiments and Results}
-Report the experiment set-up and results
+% Report the experiment set-up and results
 
 
 \section{Conclusion and Future Work}
