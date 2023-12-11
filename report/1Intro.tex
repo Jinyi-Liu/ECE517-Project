@@ -124,14 +124,50 @@ def replay(self):
     self.optimizer.step()
 \end{verbatim}
 
-\section{Training}
-We omit the code here. For this project, we set $T=1000$ and train the agent for 100 episodes. The training process is done on a personal PC with 12700K and RTX 4090. 
-
+\subsection{Training}
 After each step, we store the state, action, reward, and next state in the memory. Then if the memory is large enough, we sample a batch of data from the memory and update the network using the method mentioned in the previous subsection. 
 
 \section{Experiments and Results}
 % Report the experiment set-up and results
+For this project, we set $T=1000$ and train the agent for 100 episodes. The training process is done on a personal PC with 12700K and RTX 4090. It takes about 10 minutes to train the agent for 100 episodes. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure/Total Reward vs Episodes copy.png}
+    \caption{Total Reward during Training}
+    \label{fig:total-reward}
+\end{figure}
+\Cref{fig:total-reward} shows the total reward during training. We can see that the total reward increases as the number of episodes increases which means the agent is learning. However, it suddenly decreses at epsiode 25. This is because the agent is exploring the environment and it might take some time to find the optimal policy. After that, the total reward increases again and reaches a plateau after episode 40. This is because the agent has found the optimal policy and it is just exploiting the environment. To make it clear, we plot the average order quantity during training in \Cref{fig:avg-order-quantity}. From the figure, we can see that the average order quantity is 14, i.e., near the maximum order quantity. But then it suddenly drops to around 0 to explore the environment. After that, it increases to around 10 which is the near-optimal order quantity since the distribution of demand is symmetric with mean 10.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure/Average Order Quantities copy.png}
+    \caption{Average Order Quantity during Training}
+    \label{fig:avg-order-quantity}
+\end{figure}
+
+\subsection{Comparison with Base Order Policy}
+Since we assume a leading time of 1, the traditional base-stock method is not feasible since it requires a leading time of 0. Thus, we compare our method to the base-order policy, i.e., the retailer always order the same amount at each time period. We sample 1000 episodes and plot the histogram of the total reward in \Cref{fig:hist-base-10,fig:hist-base-11,fig:hist-base-12}. We can see that the best scenario for the base-stock policy in \Cref{fig:hist-base-10} can attain a total reward close to that in \Cref{fig:total-reward}. But it's rather rare. From \Cref{fig:hist-base-11,fig:hist-base-12}, we can see that though the worst scenario is better than that in \Cref{fig:hist-base-10} but the best scenario is worse than that in \Cref{fig:hist-base-10}. This is because the base-stock policy is not adaptive to the environment. In contrast, our method can adapt to the environment and find the optimal policy.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure/Histogram of rewards - Base 10.png}
+    \caption{Histogram of Rewards for Base Order Policy with Base Stock 10}
+    \label{fig:hist-base-10}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure/Histogram of rewards - Base 11.png}
+    \caption{Histogram of Rewards for Base Order Policy with Base Stock 11}
+    \label{fig:hist-base-11}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure/Histogram of rewards - Base 12.png}
+    \caption{Histogram of Rewards for Base Order Policy with Base Stock 12}
+    \label{fig:hist-base-12}
+\end{figure}
 
 
 \section{Conclusion and Future Work}
-Summarize your project and discuss possible extensions of the project
+% Summarize your project and discuss possible extensions of the project
+In this project, we develop a RL environment for the lost sales inventory problem and apply DQN to solve it. We show that DQN can find the optimal policy for the lost sales inventory problem. Also, we compare our method with the base-order policy and show that our method is better than the base-order policy. 
+
+But we only consider a simple DQN algorithm in this project. There are many other algorithms that can be applied to this problem. For example, we can use a more advanced algorithm such as double DQN or dueling DQN. Also, the training process can be improved. For example, we can use prioritized experience replay to improve the training process. Besides, we can also extend the environment to higher dimensions. For example, we can add the order with leading time 2, 3, etc. to the state space which might be more realistic. Currently, only 1d state space costs around 10 minutes to train for 100 episodes. If we add the order with leading time 2, 3, etc. to the state space, the training process will be much slower. Thus, we can use a more powerful computer or use a more efficient algorithm to speed up the training process. For example, use more advanced exploration methods such as noisy net or use a more efficient algorithm such as PPO.
